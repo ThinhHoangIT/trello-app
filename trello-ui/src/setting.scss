@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600');
+
+$gap: 10px;
+$column-border-radius: 4px;
+
+// Srceen height
+$navbar-app-height: 5vh;
+$navbar-board-height: 6vh;
+$board-content-height: 88.5vh;
+
+// Color
+$board-bg-color: #0097bf;
+$main-txt-color: #333;
+$common-element-bg: rgba(0.255, 0.255, 0.255, 0.24);
+$column-bg-color: #ebecf0;
+$border-input-color: #388bff;
+$icon-color: #44546f;
+
+// Screen
+$screen-lg: 1201px;
+$screen-md: 992px;
+$screen-sm: 768px;
+$screen-ip6-down: '(max-width: 375px)';

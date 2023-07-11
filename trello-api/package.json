@@ -1,0 +1,21 @@
+{
+  "name": "trello-api",
+  "version": "1.0.0",
+  "description": "APIs for trello",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "ThinhHoangIT",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.44.0",
+    "eslint-plugin-react": "^7.32.2"
+  }
+}

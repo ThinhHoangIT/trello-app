@@ -1,0 +1,63 @@
+@import './setting.scss';
+
+body {
+    margin: 0;
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 14px;
+    line-height: 1.3em;
+}
+
+.trello-master {
+    height: 100vh;
+    overflow: hidden;
+    background-color: $board-bg-color;
+    color: $main-txt-color;
+    .icon {
+        font-size: 14px;
+        margin: 0 3px;
+    }
+    .df-row {
+        display: flex;
+        align-items: center;
+    }
+    textarea:focus,
+    textarea.form-control:focus,
+    input.form-control:focus,
+    input[type='text']:focus,
+    input[type='password']:focus,
+    input[type='email']:focus,
+    input[type='number']:focus,
+    [type='text'].form-control:focus,
+    [type='password'].form-control:focus,
+    [type='email'].form-control:focus,
+    [type='tel'].form-control:focus,
+    [contenteditable].form-control:focus {
+        box-shadow: inset 0 -1px 0 #ddd;
+        border: 1px solid $border-input-color;
+    }
+    .btn:focus,
+    .btn:active {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    .content-editable {
+        background-color: inherit;
+        border: none;
+        font-size: inherit;
+        font-weight: inherit;
+        cursor: pointer;
+    }
+
+    span.cancel-icon {
+        margin-left: $gap;
+        cursor: pointer;
+        i {
+            font-size: 18px;
+            color: $icon-color;
+            &:hover {
+                color: darken($icon-color, 10);
+            }
+        }
+    }
+}
