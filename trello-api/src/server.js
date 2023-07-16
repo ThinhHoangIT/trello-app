@@ -1,14 +1,23 @@
-import express from "express";
+import express from 'express';
+import { connectDB } from './config/mongodb';
+import { env } from '~/config/environment';
 
-const app = express();
+connectDB()
+    .then(() => console.log('Connected success to database'))
+    .then(() => bootServer())
+    .catch((error) => {
+        console.log(error);
+        // eslint-disable-next-line no-undef
+        process.exit(1);
+    });
+const bootServer = () => {
+    const app = express();
 
-const hostname = "localhost";
-const port = 8010;
+    app.get('/test', async (req, res) => {
+        res.end('<h1>Hello Thinh</h1>');
+    });
 
-app.get("/", (req, res) => {
-  res.end("<h1>Hello World</h1>");
-});
-
-app.listen(port, hostname, () => {
-  console.log(`${hostname}:${port}`);
-});
+    app.listen(env.APP_PORT, env.APP_HOST, () => {
+        console.log(`${env.APP_HOST}:${env.APP_PORT}`);
+    });
+};
