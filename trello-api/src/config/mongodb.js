@@ -13,7 +13,7 @@ export const connectDB = async () => {
     await client.connect();
 
     // Assign clientDB to our dbInstance
-    dbInstance = client.db('trello');
+    dbInstance = client.db(env.DATABASE_NAME);
 };
 
 export const getDB = () => {
