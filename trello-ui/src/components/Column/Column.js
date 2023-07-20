@@ -11,10 +11,11 @@ import { MODAL_ACTION_CONFIRM } from '~/utilities/constants';
 import { mapOrder } from '~/utilities/sorts';
 import { selectAllInlineText } from '~/utilities/contentEditable';
 import { cloneDeep } from 'lodash';
+import { createNewCard, updateColumn } from '~/actions/ApiCall';
 
 function Column(props) {
-    const { column, onCardDrop, onUpdateColumn } = props;
-    const cards = mapOrder(column.cards, column.cardOrder, 'id');
+    const { column, onCardDrop, onUpdateColumnState } = props;
+    const cards = mapOrder(column.cards, column.cardOrder, '_id');
 
     const [showModal, setShowModal] = useState(false);
     const [columnTitle, setColumnTitle] = useState('');
@@ -55,21 +56,21 @@ function Column(props) {
         }
 
         const cardToAdd = {
-            id: Math.random().toString(36).substring(2, 5),
             boardId: column.boardId,
-            columnId: column.id,
+            columnId: column._id,
             title: newCardTitle.trim(),
-            cover: null,
         };
 
-        let newColumn = cloneDeep(column);
-        newColumn.cards.push(cardToAdd);
-        newColumn.cardOrder.push(cardToAdd.id);
+        createNewCard(cardToAdd).then((card) => {
+            let newColumn = cloneDeep(column);
+            newColumn.cards.push(card);
+            newColumn.cardOrder.push(card._id);
 
-        onUpdateColumn(newColumn);
+            onUpdateColumnState(newColumn);
 
-        setNewCardTitle('');
-        toggleOpenAddCard(!isOpenAddCard);
+            setNewCardTitle('');
+            toggleOpenAddCard(!isOpenAddCard);
+        });
     };
 
     const onChangeColumnTitle = (e) => {
@@ -80,7 +81,11 @@ function Column(props) {
         e.target.blur();
         if (columnTitle !== column.title) {
             const newColumn = { ...column, title: columnTitle };
-            onUpdateColumn(newColumn);
+
+            updateColumn(newColumn._id, newColumn).then((updatedColumn) => {
+                updatedColumn.cards = newColumn.cards;
+                onUpdateColumnState(updatedColumn);
+            });
         }
     };
 
@@ -91,7 +96,10 @@ function Column(props) {
     const onModalAction = (type) => {
         if (type === MODAL_ACTION_CONFIRM) {
             const newColumn = { ...column, _destroy: true };
-            onUpdateColumn(newColumn);
+            updateColumn(newColumn._id, newColumn).then((updatedColumn) => {
+                // updatedColumn.cards = newColumn.cards;
+                onUpdateColumnState(updatedColumn);
+            });
         }
         toggleShowModal();
     };
@@ -128,7 +136,7 @@ function Column(props) {
             <div className="card-list">
                 <Container
                     groupName="columns"
-                    onDrop={(dropResult) => onCardDrop(column.id, dropResult)}
+                    onDrop={(dropResult) => onCardDrop(column._id, dropResult)}
                     getChildPayload={(index) => cards[index]}
                     dragClass="card-ghost"
                     dropClass="card-ghost-drop"

@@ -30,8 +30,13 @@ const findOneById = async (id) => {
 
 const createNew = async (data) => {
     try {
-        const value = await validateSchema(data);
-        const result = await getDB().collection(cardCollectionName).insertOne(value);
+        const validateValue = await validateSchema(data);
+        const insertValue = {
+            ...validateValue,
+            boardId: new ObjectId(validateValue.boardId),
+            columnId: new ObjectId(validateValue.columnId),
+        };
+        const result = await getDB().collection(cardCollectionName).insertOne(insertValue);
         return result;
     } catch (error) {
         throw new Error(error);
@@ -65,4 +70,4 @@ const deleteMany = async (ids) => {
     }
 };
 
-export const CardModel = { createNew, update, deleteMany, findOneById };
+export const CardModel = { cardCollectionName, createNew, update, deleteMany, findOneById };

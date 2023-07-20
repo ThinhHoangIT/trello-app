@@ -7,10 +7,9 @@ import { isEmpty } from 'lodash';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './BoardContent.scss';
 import Column from '../Column/Column';
-
-import { initialData } from '~/actions/initialData';
 import { mapOrder } from '~/utilities/sorts';
 import { applyDrag } from '~/utilities/dragDrop';
+import { createNewColumn, fetchBoardDetail } from '~/actions/ApiCall';
 
 function BoardContent() {
     const [board, setBoard] = useState({});
@@ -32,12 +31,11 @@ function BoardContent() {
     }, [isOpenAddColumn]);
 
     useEffect(() => {
-        const boardFromDB = initialData.boards.find((b) => b.id === 'board-1');
-        if (boardFromDB) {
-            setBoard(boardFromDB);
-
-            setColumns(mapOrder(boardFromDB.columns, boardFromDB.columnOrder, 'id'));
-        }
+        const boardId = '64b80cc30b25a48434b24c84';
+        fetchBoardDetail(boardId).then((board) => {
+            setBoard(board);
+            setColumns(mapOrder(board.columns, board.columnOrder, '_id'));
+        });
     }, []);
 
     if (isEmpty(board)) {
@@ -53,7 +51,7 @@ function BoardContent() {
         newColumns = applyDrag(newColumns, dropResult);
 
         let newBoard = { ...board };
-        newBoard.columnOrder = newColumns.map((c) => c.id);
+        newBoard.columnOrder = newColumns.map((c) => c._id);
         newBoard.columns = newColumns;
 
         setColumns(newColumns);
@@ -63,10 +61,10 @@ function BoardContent() {
     const onCardDrop = (columnId, dropResult) => {
         if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
             let newColumns = [...columns];
-            let currentColumn = newColumns.find((c) => c.id === columnId);
+            let currentColumn = newColumns.find((c) => c._id === columnId);
 
             currentColumn.cards = applyDrag(currentColumn.cards, dropResult);
-            currentColumn.cardOrder = currentColumn.cards.map((c) => c.id);
+            currentColumn.cardOrder = currentColumn.cards.map((c) => c._id);
 
             setColumns(newColumns);
         }
@@ -83,30 +81,29 @@ function BoardContent() {
         }
 
         const columnToAdd = {
-            id: Math.random().toString(36).substring(2, 5),
-            boardId: board.id,
+            boardId: board._id,
             title: columnTitle.trim(),
-            cardOrder: [],
-            cards: [],
         };
 
-        const newColumns = [...columns];
-        newColumns.push(columnToAdd);
+        createNewColumn(columnToAdd).then((column) => {
+            const newColumns = [...columns];
+            newColumns.push(column);
 
-        let newBoard = { ...board };
-        newBoard.columnOrder = newColumns.map((c) => c.id);
-        newBoard.columns = newColumns;
+            let newBoard = { ...board };
+            newBoard.columnOrder = newColumns.map((c) => c._id);
+            newBoard.columns = newColumns;
 
-        setColumns(newColumns);
-        setBoard(newBoard);
-        setColumnTitle('');
-        toggleOpenAddColumn();
+            setColumns(newColumns);
+            setBoard(newBoard);
+            setColumnTitle('');
+            toggleOpenAddColumn();
+        });
     };
 
-    const onUpdateColumn = (column) => {
-        const columnId = column.id;
+    const onUpdateColumnState = (column) => {
+        const columnId = column._id;
         const newColumns = [...columns];
-        const columnIndex = newColumns.findIndex((i) => i.id === columnId);
+        const columnIndex = newColumns.findIndex((i) => i._id === columnId);
 
         if (column._destroy) {
             newColumns.splice(columnIndex, 1);
@@ -115,7 +112,7 @@ function BoardContent() {
         }
 
         let newBoard = { ...board };
-        newBoard.columnOrder = newColumns.map((c) => c.id);
+        newBoard.columnOrder = newColumns.map((c) => c._id);
         newBoard.columns = newColumns;
 
         setColumns(newColumns);
@@ -137,7 +134,7 @@ function BoardContent() {
             >
                 {columns?.map((column, index) => (
                     <Draggable key={index}>
-                        <Column column={column} onCardDrop={onCardDrop} onUpdateColumn={onUpdateColumn} />
+                        <Column column={column} onCardDrop={onCardDrop} onUpdateColumnState={onUpdateColumnState} />
                     </Draggable>
                 ))}
             </Container>

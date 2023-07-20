@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash';
 import { BoardModel } from '~/models/board.model';
 
 const createNew = async (data) => {
@@ -10,4 +11,25 @@ const createNew = async (data) => {
     }
 };
 
-export const BoardService = { createNew };
+const getFullBoard = async (boardId) => {
+    try {
+        const board = await BoardModel.getFullBoard(boardId);
+        if (!board || !board.columns) {
+            throw new Error('Board not found');
+        }
+
+        const transformBoard = cloneDeep(board);
+        transformBoard.columns = transformBoard.columns.filter((column) => !column._destroy);
+
+        transformBoard.columns.forEach((column) => {
+            column.cards = transformBoard.cards.filter((c) => c.columnId.toString() === column._id.toString());
+        });
+
+        delete transformBoard.cards;
+        return transformBoard;
+    } catch (error) {
+        throw new Error(error);
+    }
+};
+
+export const BoardService = { createNew, getFullBoard };
