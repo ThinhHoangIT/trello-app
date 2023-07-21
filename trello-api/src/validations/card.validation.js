@@ -19,7 +19,9 @@ const createNew = async (req, res, next) => {
 
 const update = async (req, res, next) => {
     const condition = Joi.object({
-        title: Joi.string().min(3).max(20).trim(),
+        title: Joi.string().min(3).max(30).trim(),
+        boardId: Joi.string().required(),
+        columnId: Joi.string().required(),
     });
     try {
         await condition.validateAsync(req.body, { abortEarly: false, allowUnknown: true });

@@ -2,14 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Container as BootstrapContainer, Row, Col, Form } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 import { Container, Draggable } from '@edorivai/react-smooth-dnd';
-import { isEmpty } from 'lodash';
+import { cloneDeep, isEmpty } from 'lodash';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './BoardContent.scss';
 import Column from '../Column/Column';
 import { mapOrder } from '~/utilities/sorts';
 import { applyDrag } from '~/utilities/dragDrop';
-import { createNewColumn, fetchBoardDetail } from '~/actions/ApiCall';
+import { createNewColumn, fetchBoardDetail, updateBoard, updateCard, updateColumn } from '~/actions/ApiCall';
+import { flushSync } from 'react-dom';
 
 function BoardContent() {
     const [board, setBoard] = useState({});
@@ -47,26 +48,41 @@ function BoardContent() {
     }
 
     const onColumnDrop = (dropResult) => {
-        let newColumns = [...columns];
+        let newColumns = cloneDeep(columns);
         newColumns = applyDrag(newColumns, dropResult);
 
-        let newBoard = { ...board };
+        let newBoard = cloneDeep(board);
         newBoard.columnOrder = newColumns.map((c) => c._id);
         newBoard.columns = newColumns;
 
         setColumns(newColumns);
         setBoard(newBoard);
+        updateBoard(newBoard._id, newBoard).catch(() => {
+            setColumns(columns);
+            setBoard(board);
+        });
     };
 
     const onCardDrop = (columnId, dropResult) => {
         if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
-            let newColumns = [...columns];
-            let currentColumn = newColumns.find((c) => c._id === columnId);
+            let newColumns = cloneDeep(columns);
 
+            let currentColumn = newColumns.find((c) => c._id === columnId);
             currentColumn.cards = applyDrag(currentColumn.cards, dropResult);
             currentColumn.cardOrder = currentColumn.cards.map((c) => c._id);
 
-            setColumns(newColumns);
+            flushSync(() => setColumns(newColumns));
+
+            if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
+                //     updateColumn(currentColumn._id, currentColumn).catch(() => setColumns(columns));
+                // } else {
+                updateColumn(currentColumn._id, currentColumn).catch(() => setColumns(columns));
+                if (dropResult.addedIndex !== null) {
+                    let currentCard = cloneDeep(dropResult.payload);
+                    currentCard.columnId = currentColumn._id;
+                    updateCard(currentCard._id, currentCard);
+                }
+            }
         }
     };
 
